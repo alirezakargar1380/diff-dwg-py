@@ -15,7 +15,8 @@ import cv2
 
 global tempdir, diffdir
 
-tempdir = 'D:/code_projects/python/diff-dwg/img/'
+tempdir = 'D:/code_projects/python/diff-dwg/uploads/'
+# tempdir = 'D:/code_projects/python/diff-dwg/img/'
 diffdir = 'D:/code_projects/python/diff-dwg/diff'
 
 #Anaglyph matrices
@@ -208,36 +209,49 @@ def alignimage(align1,align2):
     print("Images aligned successfully")
     return align1, align2
 
-def process_images():
+def process_images(p1, p2):
     global filePath1, filePath2, v, check, size_check
-    filePath1 = "D:/code_projects/python/diff-dwg/img/main.png"
-    filePath2 = "D:/code_projects/python/diff-dwg/img/remove.png"
+    filePath1 = p1
+    filePath2 = p2
     start = timeit.default_timer()
     img1_file = pdf2png(filePath1, tempdir)
     img2_file = pdf2png(filePath2, tempdir)
-    print(img2_file)
-    print(img1_file)
+    
+    
     # return
-    # align1, align2 = alignimage(img1_file, img2_file)
-    # im1, im2 = Image.open(align2), Image.open(align1)
-    im1, im2 = Image.open(img2_file), Image.open(img1_file)
+    align1, align2 = alignimage(img1_file, img2_file)
+    im1, im2 = Image.open(align2), Image.open(align1)
+    # im1, im2 = Image.open(img2_file), Image.open(img1_file)
     # if check.get() == 1:
     #     align1, align2 = alignimage(img1_file, img2_file)
     #     im1, im2 = Image.open(align2), Image.open(align1)
     # else:
     #     im1, im2 = Image.open(img2_file), Image.open(img1_file)
-        
+
     file_string = os.path.splitext(os.path.basename(filePath1))[0] + "-diff.png"
+    dispimg = diffdir + "\\\\" + file_string
+    waterimg = diffdir + "\\\\" + file_string
+        # if platform == "win32":
+        #     dispimg = diffdir + "\\\\" + file_string
+        #     waterimg = diffdir + "\\\\" + file_string
+        # else:
+        #     dispimg = diffdir + "/" + file_string
+        #     waterimg = diffdir + "/" + file_string
+    anaglyph(im1, im2, color2_anaglyph).save(dispimg, quality=90)
+    # watermark_text(dispimg,waterimg,"UNCONTROLLED COPY",pos=(0, 0))
+    
     if im1.size[0] == im2.size[0] and im1.size[1] == im2.size[1]:
         print("Drawing sizes match")
-        if platform == "win32":
-            dispimg = diffdir + "\\\\" + file_string
-            waterimg = diffdir + "\\\\" + file_string
-        else:
-            dispimg = diffdir + "/" + file_string
-            waterimg = diffdir + "/" + file_string
+        dispimg = diffdir + "\\\\" + file_string
+        waterimg = diffdir + "\\\\" + file_string
+        # if platform == "win32":
+        #     dispimg = diffdir + "\\\\" + file_string
+        #     waterimg = diffdir + "\\\\" + file_string
+        # else:
+        #     dispimg = diffdir + "/" + file_string
+        #     waterimg = diffdir + "/" + file_string
         anaglyph(im1, im2, color2_anaglyph).save(dispimg, quality=90)
-        watermark_text(dispimg,waterimg,"UNCONTROLLED COPY",pos=(0, 0))
+        # watermark_text(dispimg,waterimg,"UNCONTROLLED COPY",pos=(0, 0))
     else:
         print("Drawing size mismatch.")
         size_check = 1
@@ -250,7 +264,7 @@ def process_images():
    
 def main():
     print("Hello, World!")
-    process_images()
+    # process_images()
 
 
 main()
