@@ -15,9 +15,8 @@ import cv2
 
 global tempdir, diffdir
 
-tempdir = 'D:/code_projects/python/diff-dwg/uploads/'
-# tempdir = 'D:/code_projects/python/diff-dwg/img/'
-diffdir = 'D:/code_projects/python/diff-dwg/diff'
+tempdir = os.getcwd() + '/uploads/'
+diffdir = os.getcwd() + '/diff/'
 
 #Anaglyph matrices
 _magic = [0.299, 0.587, 0.114]
@@ -250,21 +249,15 @@ def process_images(p1, p2):
         # else:
         #     dispimg = diffdir + "/" + file_string
         #     waterimg = diffdir + "/" + file_string
-        anaglyph(im1, im2, color2_anaglyph).save(dispimg, quality=90)
+        anaglyph(im1, im2, color2_anaglyph).save(dispimg, quality=100)
         # watermark_text(dispimg,waterimg,"UNCONTROLLED COPY",pos=(0, 0))
     else:
         print("Drawing size mismatch.")
         size_check = 1
     del im1,im2
-    # os.remove(img1_file)
-    # os.remove(img2_file)
+    os.remove(img1_file)
+    os.remove(img2_file)
     stop = timeit.default_timer()
     print("Run time was", stop - start)
     print("Done")
-   
-def main():
-    print("Hello, World!")
-    # process_images()
-
-
-main()
+    return file_string

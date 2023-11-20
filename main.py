@@ -5,6 +5,8 @@ from fastapi import FastAPI
 import os
 import uuid
 from app import process_images
+from minio import Minio
+from minio.error import S3Error
 
 app = FastAPI()
 
@@ -30,15 +32,56 @@ def upload(files: List[UploadFile] = File(...)):
             return {"message": "There was an error uploading the file(s)"}
         finally:
             file.file.close()
-            
-    process_images("D:/code_projects/python/diff-dwg/uploads/" + file_names["file_1"],
-                    "D:/code_projects/python/diff-dwg/uploads/" + file_names["file_2"])
 
-    # process_images("D:/code_projects/python/diff-dwg/uploads/42b4559b-9cc2-4d0e-896b-ccdf010a6264.png",
-    #                 "D:/code_projects/python/diff-dwg/uploads/edce41da-70aa-44ce-847c-d067675b309a.png")
+    # True Code            
+    # process_images("D:/code_projects/python/diff-dwg/uploads/" + file_names["file_1"],
+    #                 "D:/code_projects/python/diff-dwg/uploads/" + file_names["file_2"])
+    location = os.getcwd() + "/uploads/"
+    diff_location = os.getcwd() + "/diff/"
+    convertedFileName = process_images(location + file_names["file_1"],
+                    location + file_names["file_2"])
     
-    return {"message": f"Successfuly uploaded {[file.filename for file in files]}"}
 
+    client = Minio(
+        "5.56.134.154:9000",
+        access_key="VIc01QJGemJBGBpZeeLq",
+        secret_key="30yHBBftjVOCj2OVh2mPIRFr1gqc7p2Vrft0MOmp",
+        secure=False,
+        region="us-west"
+    )
+
+    found = client.bucket_exists("diffdwg")
+    if not found:
+        client.make_bucket("diffdwg")
+    else:
+        print("Bucket 'diffdwg' already exists")
+
+    diffdir = os.getcwd() + '/diff/'
+
+    client.fput_object(
+        "diffdwg", convertedFileName, diffdir + convertedFileName,
+    )
+
+    url = client.get_presigned_url(
+        "GET",
+        "diffdwg",
+        convertedFileName
+    )
+
+    os.remove(diffdir + convertedFileName)
+    print(url)
+
+    print("uploaded file name is:", convertedFileName)
+
+    return {
+        "message": f"Successfuly uploaded {[file.filename for file in files]}",
+        "url": url
+    }
+
+# def main():
+#     print(os.getcwd() + "/////")
+
+# main()
 
 if not os.path.exists("./uploads"):
     os.makedirs("./uploads")
